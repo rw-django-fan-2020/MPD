@@ -1,0 +1,88 @@
+name: Build MPD for Alpine Linux
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+jobs:
+  build-alpine:
+    runs-on: ubuntu-latest
+
+    container:
+      image: alpine:3.22
+
+    steps:
+      - name: Install build tools
+        run: |
+          apk update
+          apk add --no-cache \
+            alpine-sdk \
+            meson \
+            ninja \
+            bash \
+            curl \
+            git \
+            musl-dev \
+            pkgconfig \
+            boost-dev \
+            avahi-dev \
+            libupnp-dev \
+            libmad-dev \
+            flac-dev \
+            opus-dev \
+            vorbis-dev \
+            sqlite-dev \
+            samba-dev
+
+      - name: Checkout MPD
+        run: |
+          git clone https://github.com/MusicPlayerDaemon/MPD.git
+          cd MPD
+          git fetch --tags
+          # git checkout v0.24.5
+
+      - name: Build MPD
+        working-directory: MPD
+        run: |
+          meson setup build \
+            --buildtype=release \
+            -Dsysconfdir='/etc' \
+            -Dsnapcast=enabled \
+            -Dupnp=enabled \
+            -Dsqlite=true
+          ninja -C build
+
+      - name: Install MPD into package root
+        run: |
+          mkdir -p pkgroot
+          cd MPD/build
+          DESTDIR="$(pwd)/../../pkgroot" ninja install
+
+      - name: Create APK metadata
+        run: |
+          mkdir -p apkbuild/CONTROL
+          cat > apkbuild/CONTROL/control <<EOF
+          Package: mpd-snapcast
+          Version:  0.24.5-r0
+          Architecture: amd64
+          Maintainer: You
+          Description: MPD compiled with snapcast support
+          EOF
+
+      - name: Create APK package
+        run: |
+          apk-tools pkg \
+            --out mpd-snapcast.apk \
+            --keys-dir /etc/apk/keys \
+            --metadata-dir apkbuild/CONTROL \
+            pkgroot
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpd-snapcast-apk
+          path: mpd-snapcast.apk
