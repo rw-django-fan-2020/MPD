@@ -34,7 +34,7 @@ jobs:
             libmad-dev \
             flac-dev \
             opus-dev \
-            vorbis-dev \
+            libvorbis-dev \
             sqlite-dev \
             samba-dev
 
