@@ -24,7 +24,7 @@ jobs:
             meson \
             ninja \
             bash \
-            curl \
+            curl-dev \
             git \
             musl-dev \
             pkgconfig \
