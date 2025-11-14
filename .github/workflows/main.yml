@@ -75,7 +75,7 @@ jobs:
 
       - name: Create APK package
         run: |
-          apk-tools pkg \
+          apk mkpkg \
             --out mpd-snapcast.apk \
             --keys-dir /etc/apk/keys \
             --metadata-dir apkbuild/CONTROL \
