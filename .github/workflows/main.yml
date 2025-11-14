@@ -51,8 +51,8 @@ jobs:
           meson setup build \
             --buildtype=release \
             -Dsysconfdir='/etc' \
-            -Dsnapcast=enabled \
-            -Dupnp=enabled \
+            -Dsnapcast=true \
+            -Dupnp=true \
             -Dsqlite=true
           ninja -C build
 
