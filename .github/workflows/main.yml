@@ -52,7 +52,7 @@ jobs:
             --buildtype=release \
             -Dsysconfdir='/etc' \
             -Dsnapcast=true \
-            -Dupnp=true \
+            -Dupnp=pupnp \
             -Dsqlite=true
           ninja -C build
 
