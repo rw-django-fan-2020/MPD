@@ -53,7 +53,7 @@ jobs:
             -Dsysconfdir='/etc' \
             -Dsnapcast=true \
             -Dupnp=pupnp \
-            -Dsqlite=true
+            -Dsqlite=enabled
           ninja -C build
 
       - name: Install MPD into package root
