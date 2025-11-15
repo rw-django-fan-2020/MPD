@@ -20,7 +20,6 @@ jobs:
         run: |
           apk update
           apk add --no-cache \
-            apk-tools-mkpkg \
             alpine-sdk \
             meson \
             ninja \
@@ -44,7 +43,6 @@ jobs:
           git clone https://github.com/MusicPlayerDaemon/MPD.git
           cd MPD
           git fetch --tags
-          # git checkout v0.24.5
 
       - name: Build MPD
         working-directory: MPD
@@ -68,19 +66,21 @@ jobs:
           mkdir -p apkbuild/CONTROL
           cat > apkbuild/CONTROL/control <<EOF
           Package: mpd-snapcast
-          Version:  0.24.5-r0
-          Architecture: amd64
+          Version: 0.24.5-r0
+          Architecture: x86_64
+          License: GPL-2.0-or-later
           Maintainer: You
           Description: MPD compiled with snapcast support
           EOF
 
-      - name: Create APK package
+      - name: Build APK manually (Alpine 3.22 compatible)
         run: |
-          apk mkpkg \
-            --out mpd-snapcast.apk \
-            --keys-dir /etc/apk/keys \
-            --metadata-dir apkbuild/CONTROL \
-            pkgroot
+          # Create control.tar.gz
+          tar -C apkbuild/CONTROL -czf control.tar.gz .
+          # Create data.tar.gz from pkgroot
+          tar -C pkgroot -czf data.tar.gz .
+          # Build the final .apk = simple tar
+          tar -czf mpd-snapcast.apk control.tar.gz data.tar.gz
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
