@@ -2,6 +2,10 @@ name: Build MPD for Alpine Linux
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'v0.24.5'
+        required: false
   push:
     branches:
       - main
@@ -88,16 +92,13 @@ jobs:
           name: mpd-snapcast-apk
           path: mpd-snapcast.apk
 
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Create Release and upload APK (tag or manual)
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '')
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.release_tag }}
           files: mpd-snapcast.apk
-          
-      - name: Upload APK to Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: mpd-snapcast.apk
-          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
